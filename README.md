@@ -1,6 +1,6 @@
-# 🚀 RTX 3080 AI Docker 환경 구축 스크립트 v4.3
+# 🚀 RTX 3080 AI Docker 환경 구축 스크립트 (Universal)
 
-> **완벽한 문제 해결과 실용적 모델 공유를 위한 AI 환경 구축 도구**
+> **완벽한 문제 해결과 실용적 모델 공유를 위한 범용 AI 환경 구축 도구**
 
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![NVIDIA](https://img.shields.io/badge/NVIDIA-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://www.nvidia.com/)
@@ -75,23 +75,24 @@ git clone https://github.com/yourusername/rtx3080-ai-docker.git
 cd rtx3080-ai-docker
 
 # 실행 권한 부여
-chmod +x setup_ai_env_full.sh
+chmod +x setup_ai_env_universal.sh
 
-# 기본 환경 구축
-./setup_ai_env_full.sh --delete --force-recreate --no-models
+# 기본 환경 구축 (자동으로 .env 파일 생성됨)
+./setup_ai_env_universal.sh --delete --force-recreate --no-models
 ```
 
-**🔧 개인 설정 (필수):**
+**🔧 개인 설정 (자동 생성됨):**
 ```bash
-# 1. .env 파일 생성 및 수정
-cp .env.example .env
-nano .env  # 또는 선호하는 에디터
+# 1. .env 파일이 자동으로 생성됩니다 (스크립트 실행 시)
+# 2. 필요에 따라 다음 항목들을 수정:
+# - USER_NAME: 실제 호스트 사용자명 (자동 감지됨)
+# - WANTED_UID: 실제 호스트 UID (1024 권장)
+# - WANTED_GID: 실제 호스트 GID (1024 권장)
+# - BASE_DIR: 실제 프로젝트 경로 (자동 생성됨)
 
-# 2. 다음 항목들을 실제 값으로 수정:
-# - USER_NAME: 실제 호스트 사용자명
-# - WANTED_UID: 실제 호스트 UID (id -u 명령어로 확인)
-# - WANTED_GID: 실제 호스트 GID (id -g 명령어로 확인)
-# - BASE_DIR: 실제 프로젝트 경로
+# 3. 권한 설정 (1024 권장)
+sudo chown -R 1024:1024 /home/yourname/ai-project/shared
+sudo chmod -R 755 /home/yourname/ai-project/shared
 ```
 
 ### 🌐 **접속 정보**
@@ -106,7 +107,7 @@ SDW: http://localhost:8183 (full 모드)
 
 ```
 rtx3080-ai-docker/
-├── 📄 setup_ai_env_full.sh          # 메인 스크립트 (v4.3)
+├── 📄 setup_ai_env_universal.sh     # 범용 메인 스크립트
 ├── 📄 .env.example                  # 환경 변수 템플릿
 ├── 📄 README.md                     # 이 파일
 ├── 📁 shared/                       # 데이터 공유 디렉터리
@@ -125,8 +126,8 @@ rtx3080-ai-docker/
 ```bash
 # ===[👤 사용자 권한 설정]===
 USER_NAME=aiuser              # 컨테이너 사용자명 (호스트와 동일하게 설정)
-WANTED_UID=1000              # UID (1000 이상 권장, 호스트 UID와 일치)
-WANTED_GID=1000              # GID (호스트 GID와 일치)
+WANTED_UID=1024              # UID (1024 권장, 호스트 UID와 일치)
+WANTED_GID=1024              # GID (호스트 GID와 일치)
 
 # ===[📁 경로 설정]===
 BASE_DIR=/home/aiuser/ai-project/shared    # 프로젝트 루트 디렉터리
@@ -152,6 +153,39 @@ whoami   # 사용자명 확인
 
 # 3단계: 디렉터리 생성
 mkdir -p /home/yourname/my-ai-project/shared/{common/{models,outputs},cache,comfyui,forge,sdw}
+
+# 4단계: 권한 설정 (1024 권장)
+sudo chown -R 1024:1024 /home/yourname/my-ai-project/shared
+sudo chmod -R 755 /home/yourname/my-ai-project/shared
+
+# 5단계: UID/GID 1024로 변경 (권장)
+sudo usermod -u 1024 yourname
+sudo groupmod -g 1024 yourname
+# 또는 새 사용자 생성 (더 안전한 방법)
+sudo useradd -u 1024 -g 1024 -m -s /bin/bash aiuser
+```
+
+**🔧 UID/GID 1024 변경 상세 가이드:**
+```bash
+# 방법 1: 기존 사용자 UID/GID 변경 (권장)
+sudo usermod -u 1024 yourname
+sudo groupmod -g 1024 yourname
+
+# 방법 2: 새 사용자 생성 (더 안전)
+sudo useradd -u 1024 -g 1024 -m -s /bin/bash aiuser
+sudo usermod -aG sudo aiuser  # sudo 권한 추가
+
+# 방법 3: 그룹 생성 후 사용자 추가
+sudo groupadd -g 1024 aigroup
+sudo usermod -g 1024 yourname
+
+# 변경 후 확인
+id yourname
+id aiuser  # 새 사용자 생성한 경우
+
+# 중요: 변경 후 재로그인 필요
+exit
+# 새 터미널에서 다시 로그인
 ```
 
 **🔧 환경 변수 설정 예시:**
@@ -160,8 +194,8 @@ mkdir -p /home/yourname/my-ai-project/shared/{common/{models,outputs},cache,comf
 cat > .env << 'EOF'
 # ===[👤 사용자 권한 설정]===
 USER_NAME=your_actual_username          # 실제 호스트 사용자명
-WANTED_UID=1000                         # 실제 호스트 UID
-WANTED_GID=1000                         # 실제 호스트 GID
+WANTED_UID=1024                         # 실제 호스트 UID (1024 권장)
+WANTED_GID=1024                         # 실제 호스트 GID (1024 권장)
 
 # ===[📁 경로 설정]===
 BASE_DIR=/home/your_actual_username/ai-project/shared
@@ -258,8 +292,13 @@ docker exec comfyui git config --global --add safe.directory '*'
 #### **2. 권한 문제**
 ```bash
 # 호스트에서 권한 수정 (실제 경로로 변경)
-sudo chown -R 1000:1000 /home/aiuser/ai-project/shared
+sudo chown -R 1024:1024 /home/aiuser/ai-project/shared
 sudo chmod -R 755 /home/aiuser/ai-project/shared
+
+# UID/GID 1024로 변경 (권장)
+sudo usermod -u 1024 aiuser
+sudo groupmod -g 1024 aiuser
+# 변경 후 재로그인 필요
 ```
 
 #### **3. WSL2 마운트 문제**
@@ -284,6 +323,7 @@ ln -sf /comfy/mnt/models/vae vae
 - [ ] Docker Desktop이 실행 중인가?
 - [ ] NVIDIA 드라이버가 최신인가?
 - [ ] 호스트 디렉터리 권한이 올바른가?
+- [ ] UID/GID가 1024로 설정되어 있는가? (권장)
 - [ ] 포트가 다른 서비스와 충돌하지 않는가?
 - [ ] 충분한 디스크 공간이 있는가?
 
@@ -295,6 +335,11 @@ ln -sf /comfy/mnt/models/vae vae
 - ✅ **WSL2 마운트 문제 영구 해결**: 환경 변수 기반 스크립트 전달
 - ✅ **ComfyUI 모델 심볼릭 링크**: 자동 생성 + 재시도 로직
 - ✅ **확장 설치 후 재시작 문제**: 마운트 포인트 자동 복구
+
+### **v4.4 (2024-08-26) - 범용 스크립트**
+- ✅ **자동 .env 파일 생성**: 사용자별 설정 자동 감지
+- ✅ **UID/GID 1024 권장**: 안정적인 권한 설정
+- ✅ **범용성 강화**: 하드코딩 제거, 환경 변수 기반
 
 ### **v4.2 (2024-08-26) - Git 문제 해결**
 - 🔧 Git 저장소 오류 자동 복구
@@ -321,7 +366,7 @@ git clone https://github.com/yourusername/rtx3080-ai-docker.git
 cd rtx3080-ai-docker
 
 # 테스트 실행
-./setup_ai_env_full.sh --delete --force-recreate --no-models
+./setup_ai_env_universal.sh --delete --force-recreate --no-models
 ```
 
 ### 📝 **기여 가이드라인**
