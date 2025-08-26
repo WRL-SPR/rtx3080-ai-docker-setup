@@ -81,6 +81,19 @@ chmod +x setup_ai_env_full.sh
 ./setup_ai_env_full.sh --delete --force-recreate --no-models
 ```
 
+**🔧 개인 설정 (필수):**
+```bash
+# 1. .env 파일 생성 및 수정
+cp .env.example .env
+nano .env  # 또는 선호하는 에디터
+
+# 2. 다음 항목들을 실제 값으로 수정:
+# - USER_NAME: 실제 호스트 사용자명
+# - WANTED_UID: 실제 호스트 UID (id -u 명령어로 확인)
+# - WANTED_GID: 실제 호스트 GID (id -g 명령어로 확인)
+# - BASE_DIR: 실제 프로젝트 경로
+```
+
 ### 🌐 **접속 정보**
 
 ```
@@ -111,19 +124,34 @@ rtx3080-ai-docker/
 
 ```bash
 # ===[👤 사용자 권한 설정]===
-USER_NAME=helm                # 컨테이너 사용자명
-WANTED_UID=1024              # UID (1000 이상 권장)
-WANTED_GID=1024              # GID
+USER_NAME=aiuser              # 컨테이너 사용자명 (호스트와 동일하게 설정)
+WANTED_UID=1000              # UID (1000 이상 권장, 호스트 UID와 일치)
+WANTED_GID=1000              # GID (호스트 GID와 일치)
 
 # ===[📁 경로 설정]===
-BASE_DIR=/home/helm/imagine/shared
-MODELS_DIR=${BASE_DIR}/common/models
-OUTPUTS_DIR=${BASE_DIR}/common/outputs
+BASE_DIR=/home/aiuser/ai-project/shared    # 프로젝트 루트 디렉터리
+MODELS_DIR=${BASE_DIR}/common/models       # AI 모델 저장소
+OUTPUTS_DIR=${BASE_DIR}/common/outputs     # 생성된 결과물 저장소
 
 # ===[🐳 Docker 설정]===
 COMFYUI_IMAGE=mmartial/comfyui-nvidia-docker:latest
 FORGE_IMAGE=nykk3/stable-diffusion-webui-forge:latest
 SDW_IMAGE=siutin/stable-diffusion-webui-docker:latest-cuda
+```
+
+**📝 사용자별 설정 가이드:**
+```bash
+# 1단계: 호스트 사용자 정보 확인
+id -u    # UID 확인
+id -g    # GID 확인
+whoami   # 사용자명 확인
+
+# 2단계: .env 파일에서 경로 수정
+# BASE_DIR을 실제 프로젝트 경로로 변경
+# 예: /home/yourname/my-ai-project/shared
+
+# 3단계: 디렉터리 생성
+mkdir -p /home/yourname/my-ai-project/shared/{common/{models,outputs},cache,comfyui,forge,sdw}
 ```
 
 ### 🚀 **RTX 3080 최적화 설정**
@@ -201,9 +229,9 @@ docker exec comfyui git config --global --add safe.directory '*'
 
 #### **2. 권한 문제**
 ```bash
-# 호스트에서 권한 수정
-sudo chown -R 1024:1024 /home/helm/imagine/shared
-sudo chmod -R 755 /home/helm/imagine/shared
+# 호스트에서 권한 수정 (실제 경로로 변경)
+sudo chown -R 1000:1000 /home/aiuser/ai-project/shared
+sudo chmod -R 755 /home/aiuser/ai-project/shared
 ```
 
 #### **3. WSL2 마운트 문제**
