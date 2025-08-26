@@ -115,8 +115,8 @@ SDW_CTR_PORT=${SDW_CTR_PORT:-7861}
 
 # 실행 인자
 COMFY_CLI_ARGS="${COMFY_CLI_ARGS:---listen 0.0.0.0 --port 8188 --enable-cors-header}"
-FORGE_ARGS="${FORGE_ARGS:---listen --port 7860 --server-name 0.0.0.0 --api --xformers --opt-sdp-attention --enable-insecure-extension-access --no-half-vae --theme dark --gradio-queue --opt-channelslast --allow-code --medvram --skip-version-check}"
-SDW_ARGS="${SDW_ARGS:---listen --port 7861 --server-name 0.0.0.0 --api --xformers --opt-sdp-attention --no-half-vae --enable-insecure-extension-access --theme dark --opt-channelslast --gradio-queue --allow-code --medvram --skip-version-check}"
+FORGE_ARGS="${FORGE_ARGS:---listen --port 7860 --server-name 0.0.0.0 --api --xformers --opt-sdp-attention --enable-insecure-extension-access --no-half-vae --theme dark --gradio-queue --opt-channelslast --allow-code --cuda-malloc --skip-version-check}"
+SDW_ARGS="${SDW_ARGS:---listen --port 7861 --server-name 0.0.0.0 --api --xformers --opt-sdp-attention --no-half-vae --enable-insecure-extension-access --theme dark --opt-channelslast --gradio-queue --allow-code --cuda-malloc --skip-version-check}"
 
 # 기능 설정
 ENABLE_CACHE_SHARE=${ENABLE_CACHE_SHARE:-true}
@@ -142,7 +142,7 @@ CREATE_CONTROLNET_SUBDIRS=${CREATE_CONTROLNET_SUBDIRS:-false}
 
 # 마운트 옵션
 MOUNT_CONTROLNET=${MOUNT_CONTROLNET:-true}
-MOUNT_MULTIPLE_UPSCALERS=${MOUNT_MULTIPLE_UPSCALERS:-true}
+MOUNT_MULTIPLE_UPSCALERS=${MOUNT_MULTIPLE_UPSCALERS:-false}
 
 # Git 및 네트워크 문제 대응
 ENABLE_GIT_SAFE_MODE=${ENABLE_GIT_SAFE_MODE:-true}
