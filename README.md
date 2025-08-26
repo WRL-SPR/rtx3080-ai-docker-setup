@@ -1,134 +1,315 @@
-# RTX 3080 AI Docker 환경 설정 v4.2 (Git 문제 해결)
+# 🚀 RTX 3080 AI Docker 환경 구축 스크립트 v4.3
 
-## 환경설정 예시와 항목별 상세 설명
+> **완벽한 문제 해결과 실용적 모델 공유를 위한 AI 환경 구축 도구**
 
-### 사용자/그룹 설정
-```ini
-USER_NAME=helm                # 컨테이너 리눅스 사용자명 (호스트와 통일 권장)
-GROUP_NAME=helm               # 그룹명
-WANTED_UID=1024               # 파일 권한 일치 위해 UID/GID를 컨테이너/호스트와 통일(1000 이상)
-WANTED_GID=1024
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![NVIDIA](https://img.shields.io/badge/NVIDIA-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://www.nvidia.com/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](LICENSE)
+
+## 📋 목차
+
+- [✨ 주요 기능](#-주요-기능)
+- [🔧 해결된 문제들](#-해결된-문제들)
+- [🚀 빠른 시작](#-빠른-시작)
+- [📁 프로젝트 구조](#-프로젝트-구조)
+- [⚙️ 환경 설정](#️-환경-설정)
+- [📖 사용법](#-사용법)
+- [🔍 문제 해결](#-문제-해결)
+- [📝 변경 이력](#-변경-이력)
+- [🤝 기여하기](#-기여하기)
+- [📄 라이선스](#-라이선스)
+
+## ✨ 주요 기능
+
+### 🎯 **완벽한 문제 해결**
+- ✅ **Git 문제**: `fatal: not a git repository`, `dubious ownership` 완전 해결
+- ✅ **권한 문제**: `Permission denied`, `could not lock config file` 완전 해결
+- ✅ **WSL2 마운트 문제**: `error mounting` 영구 해결
+- ✅ **확장 설치 후 재시작 마운트 문제**: 완벽 해결
+
+### 🐳 **Docker 컨테이너 관리**
+- **ComfyUI**: 최신 ComfyUI Docker 이미지 지원
+- **Forge WebUI**: 안정적인 Forge 기반 Stable Diffusion WebUI
+- **SDW**: 기본 Stable Diffusion WebUI (full 모드)
+- **모델 공유**: 모든 컨테이너 간 실시간 모델 공유
+
+### 🚀 **RTX 3080 최적화**
+- **PyTorch 2.3.1+cu121**: 최신 CUDA 12.1 지원
+- **xFormers 0.0.26.post1**: 메모리 효율성 극대화
+- **CUDA 할당 최적화**: `max_split_size_mb:512` 설정
+- **VRAM 모니터링**: 실시간 GPU 메모리 상태 확인
+
+### 🔗 **실용적 모델 공유**
+- **통합 모델 디렉터리**: ComfyUI와 WebUI 간 자동 동기화
+- **심볼릭 링크**: 컨테이너 내부 자동 생성
+- **캐시 공유**: HuggingFace, PyTorch 캐시 공유
+- **권한 관리**: 자동 권한 설정 및 복구
+
+## 🔧 해결된 문제들
+
+| 문제 유형 | 해결 방법 | 상태 |
+|-----------|-----------|------|
+| **Git 저장소 오류** | `git config --global --add safe.directory *` + 자동 초기화 | ✅ 완료 |
+| **권한 거부 오류** | 4단계 권한 설정 시스템 + 재시도 로직 | ✅ 완료 |
+| **WSL2 마운트 오류** | 환경 변수 기반 스크립트 전달 + 컨테이너 내부 생성 | ✅ 완료 |
+| **모델 공유 문제** | 자동 심볼릭 링크 생성 + 실시간 동기화 | ✅ 완료 |
+| **확장 설치 후 재시작** | 마운트 포인트 자동 복구 + 권한 재설정 | ✅ 완료 |
+
+## 🚀 빠른 시작
+
+### 📋 **사전 요구사항**
+
+```bash
+# Ubuntu 20.04+ / WSL2
+# Docker Desktop 4.0+
+# NVIDIA GPU + CUDA 12.1 지원 드라이버
+# 최소 16GB RAM, 50GB 여유 공간
 ```
-- 호스트 계정도 동일 UID/GID 권장. 변경 시 기존 소유 파일은 반드시 `chown -R [UID]:[GID]` 처리
 
-### 기본 경로 구조
-```ini
-BASE_DIR=/home/helm/imagine/shared       # 데이터 공유 루트
-COMMON_DIR=${BASE_DIR}/common
-COMFY_BASEDIR=${BASE_DIR}/comfyui
-MODELS_DIR=${COMMON_DIR}/models
-OUTPUTS_DIR=${COMMON_DIR}/outputs
-CACHE_DIR=${BASE_DIR}/cache
+### ⚡ **1분 설치**
+
+```bash
+# 저장소 클론
+git clone https://github.com/yourusername/rtx3080-ai-docker.git
+cd rtx3080-ai-docker
+
+# 실행 권한 부여
+chmod +x setup_ai_env_full.sh
+
+# 기본 환경 구축
+./setup_ai_env_full.sh --delete --force-recreate --no-models
 ```
-- 절대경로 사용 필수, 사전 생성 및 755 이상 권한으로 셋팅
 
-### 컨테이너별 디렉터리
-```ini
-FORGE_BASEDIR=${BASE_DIR}/forge
-SDW_BASEDIR=${BASE_DIR}/sdw
+### 🌐 **접속 정보**
+
 ```
-- 컨테이너별 독립 경로 지정, 충돌 예방
-
-### 각 컨테이너 설정 및 포트
-```ini
-COMFYUI_CONTAINER=comfyui
-COMFYUI_IMAGE=your/comfyui-nvidia-docker:latest
-COMFY_HOST_PORT=8181
-COMFY_CTR_PORT=8188
-COMFY_CLI_ARGS="--listen ..."
-
-FORGE_CONTAINER=forge
-FORGE_IMAGE=your/stable-diffusion-webui-forge:latest
-FORGE_HOST_PORT=8182
-FORGE_CTR_PORT=7860
-FORGE_ARGS="--listen ..."
-
-SDW_CONTAINER=sdw
-SDW_IMAGE=your/stable-diffusion-webui-docker:latest-cuda
-SDW_HOST_PORT=8183
-SDW_CTR_PORT=7860
-SDW_ARGS="--listen ..."
+ComfyUI: http://localhost:8181
+Forge WebUI: http://localhost:8182
+SDW: http://localhost:8183 (full 모드)
 ```
-- 포트 충돌 방지, 각 서비스별로 분리 지정
 
-### RTX 3080 최적화 옵션
-```ini
+## 📁 프로젝트 구조
+
+```
+rtx3080-ai-docker/
+├── 📄 setup_ai_env_full.sh          # 메인 스크립트 (v4.3)
+├── 📄 .env.example                  # 환경 변수 템플릿
+├── 📄 README.md                     # 이 파일
+├── 📁 shared/                       # 데이터 공유 디렉터리
+│   ├── 📁 models/                   # AI 모델 (공유)
+│   ├── 📁 outputs/                  # 생성된 결과물
+│   └── 📁 cache/                    # 캐시 공유
+├── 📁 comfyui/                      # ComfyUI 전용 데이터
+├── 📁 forge/                        # Forge WebUI 전용 데이터
+└── 📁 sdw/                          # SDW 전용 데이터
+```
+
+## ⚙️ 환경 설정
+
+### 🔧 **기본 환경 변수**
+
+```bash
+# ===[👤 사용자 권한 설정]===
+USER_NAME=helm                # 컨테이너 사용자명
+WANTED_UID=1024              # UID (1000 이상 권장)
+WANTED_GID=1024              # GID
+
+# ===[📁 경로 설정]===
+BASE_DIR=/home/helm/imagine/shared
+MODELS_DIR=${BASE_DIR}/common/models
+OUTPUTS_DIR=${BASE_DIR}/common/outputs
+
+# ===[🐳 Docker 설정]===
+COMFYUI_IMAGE=mmartial/comfyui-nvidia-docker:latest
+FORGE_IMAGE=nykk3/stable-diffusion-webui-forge:latest
+SDW_IMAGE=siutin/stable-diffusion-webui-docker:latest-cuda
+```
+
+### 🚀 **RTX 3080 최적화 설정**
+
+```bash
+# ===[🎯 RTX 3080 최적화]===
 ENABLE_RTX3080_OPTIMIZATION=true
-PYTORCH_CUDA_ALLOC_CONF="max_split_size_mb:512,garbage_collection_threshold:0.6"
-SHM_SIZE="4g"
+PYTORCH_VERSION=2.3.1+cu121
+XFORMERS_VERSION=0.0.26.post1
+PYTORCH_CUDA_ALLOC_CONF="max_split_size_mb:512,garbage_collection_threshold:0.6,expandable_segments:True"
+SHM_SIZE=4g
 ```
 
-### 버전 관리 예시
-```ini
-PYTORCH_VERSION="2.3.1+cu121"
-TORCHVISION_VERSION="0.18.1+cu121"
-TORCHAUDIO_VERSION="2.3.1+cu121"
-XFORMERS_VERSION="0.0.26.post1"
+### 🔒 **보안 설정**
+
+```bash
+# ===[🔒 보안 설정]===
+ALLOW_EXTERNAL_ACCESS=false    # 외부 접근 제한
+LOG_LEVEL=INFO                 # 로그 레벨
+ENABLE_VRAM_MONITORING=true    # VRAM 모니터링
 ```
 
-### Git 및 네트워크 문제 대응
-```ini
-ENABLE_GIT_SAFE_MODE=true        # 파일권한/Clone 오류 자동복구
-OFFLINE_MODE=false               # 네트워크 문제시만 true
-SKIP_GIT_CLONE=false
-PRE_PREPARE_ASSETS=true
-GIT_CLONE_TIMEOUT=300
-MAX_GIT_RETRY=3
+## 📖 사용법
+
+### 🎯 **기본 실행**
+
+```bash
+# 완전한 AI 환경 구축
+./setup_ai_env_full.sh --delete --force-recreate --no-models
+
+# Git 문제만 수정 (기존 컨테이너 유지)
+./setup_ai_env_full.sh --fix-git-only
+
+# 오프라인 모드 (Git 클론 건너뛰기)
+./setup_ai_env_full.sh --offline-mode
 ```
-- 다양한 실전 상황에 따른 안전장치 옵션입니다
 
-### 배포/기타 옵션 요약
-- DEPLOY_MODE: (basic/full/all) 환경에 맞게 선택
-- LOG_LEVEL: 운영환경은 INFO 이상, DEBUG는 개발용만
-- ALLOW_EXTERNAL_ACCESS=false: 외부 공개 필요 없으면 false 권장
-- 기타: 모델 백업/복구·성능 튜닝 값 등 필요에 따라 추가
+### 🔧 **고급 옵션**
 
-### 보안 및 운영 실전 Tip
-- 모든 토큰·키·패스워드는 절대 저장소 커밋 불가, 반드시 .env 파일에서만 분리 보관(Git에는 .gitignore 적용)
-- UID/GID 변경 시 기존 파일 소유권 항상 체크
-- 컨테이너 외부 접근(포트 열기)은 최소화, 127.0.0.1 바인딩 권장
-- root 권한 사용 지양, 소유자 권한과 그룹만 운영
+```bash
+# 모델 하위 디렉터리 생성 (카테고리별 정리)
+./setup_ai_env_full.sh --create-subdirs
+
+# 플랫 구조 유지 (기본값)
+./setup_ai_env_full.sh --flat-structure
+
+# 완전 재구축
+./setup_ai_env_full.sh --delete
+```
+
+### 📊 **상태 확인**
+
+```bash
+# 컨테이너 상태 확인
+docker ps --filter "name=comfyui|forge|sdw"
+
+# 로그 확인
+docker logs comfyui
+docker logs forge
+docker logs sdw
+```
+
+## 🔍 문제 해결
+
+### ❌ **일반적인 문제들**
+
+#### **1. Git 저장소 오류**
+```bash
+# 자동 해결 (권장)
+./setup_ai_env_full.sh --fix-git-only
+
+# 수동 해결
+docker exec comfyui git config --global --add safe.directory '*'
+```
+
+#### **2. 권한 문제**
+```bash
+# 호스트에서 권한 수정
+sudo chown -R 1024:1024 /home/helm/imagine/shared
+sudo chmod -R 755 /home/helm/imagine/shared
+```
+
+#### **3. WSL2 마운트 문제**
+```bash
+# 자동 해결됨 (v4.3에서 영구 해결)
+# 추가 설정 불필요
+```
+
+#### **4. 모델 공유 문제**
+```bash
+# ComfyUI 컨테이너에서 수동 생성
+docker exec comfyui bash -c "
+cd /comfy/mnt/ComfyUI/models
+ln -sf /comfy/mnt/models/checkpoints checkpoints
+ln -sf /comfy/mnt/models/loras loras
+ln -sf /comfy/mnt/models/vae vae
+"
+```
+
+### 📋 **문제 해결 체크리스트**
+
+- [ ] Docker Desktop이 실행 중인가?
+- [ ] NVIDIA 드라이버가 최신인가?
+- [ ] 호스트 디렉터리 권한이 올바른가?
+- [ ] 포트가 다른 서비스와 충돌하지 않는가?
+- [ ] 충분한 디스크 공간이 있는가?
+
+## 📝 변경 이력
+
+### **v4.3 (2024-08-26) - 문제 해결 강화**
+- ✅ **Git 문제 완전 해결**: `safe.directory` 설정 + 자동 초기화
+- ✅ **권한 문제 완전 해결**: 4단계 권한 설정 시스템
+- ✅ **WSL2 마운트 문제 영구 해결**: 환경 변수 기반 스크립트 전달
+- ✅ **ComfyUI 모델 심볼릭 링크**: 자동 생성 + 재시도 로직
+- ✅ **확장 설치 후 재시작 문제**: 마운트 포인트 자동 복구
+
+### **v4.2 (2024-08-26) - Git 문제 해결**
+- 🔧 Git 저장소 오류 자동 복구
+- 🔧 권한 문제 해결 시스템
+- 🔧 네트워크 연결 문제 대응
+
+### **v4.1 (2024-08-26) - 기본 기능**
+- 🐳 Docker 컨테이너 자동 생성
+- 🔗 모델 공유 시스템
+- 🚀 RTX 3080 최적화
+
+### **v4.0 (2024-08-26) - 초기 버전**
+- 📁 기본 디렉터리 구조
+- 🐳 Docker 이미지 설정
+- ⚙️ 환경 변수 기본값
+
+## 🤝 기여하기
+
+### 🔧 **개발 환경 설정**
+
+```bash
+# 개발 환경 클론
+git clone https://github.com/yourusername/rtx3080-ai-docker.git
+cd rtx3080-ai-docker
+
+# 테스트 실행
+./setup_ai_env_full.sh --delete --force-recreate --no-models
+```
+
+### 📝 **기여 가이드라인**
+
+1. **Fork** 저장소
+2. **Feature branch** 생성 (`git checkout -b feature/amazing-feature`)
+3. **Commit** 변경사항 (`git commit -m 'Add amazing feature'`)
+4. **Push** 브랜치 (`git push origin feature/amazing-feature`)
+5. **Pull Request** 생성
+
+### 🐛 **버그 리포트**
+
+- [Issues](https://github.com/yourusername/rtx3080-ai-docker/issues) 페이지에서 버그 리포트
+- 상세한 오류 메시지와 재현 단계 포함
+- 시스템 정보 (OS, Docker 버전, GPU 모델 등) 제공
+
+## 📄 라이선스
+
+이 프로젝트는 [Mozilla Public License 2.0](LICENSE) 하에 배포됩니다.
+
+**MPL 2.0의 주요 특징:**
+- ✅ **소스 코드 공개**: 수정된 소스 코드는 반드시 공개
+- ✅ **파일별 라이선스**: 수정된 파일만 MPL 2.0 적용
+- ✅ **상업적 사용**: 자유로운 상업적 사용 가능
+- ✅ **특허 보호**: 특허 소송으로부터 보호
+- ✅ **호환성**: GPL, LGPL 등과 호환
+
+**간단한 요약:**
+- 이 스크립트를 수정하여 배포할 때는 **수정된 파일을 공개**해야 합니다
+- **새로운 파일**은 자유롭게 라이선스 선택 가능
+- **상업적 사용**도 자유롭게 가능합니다
+
+**전체 라이선스 텍스트는 [LICENSE](LICENSE) 파일을 참조하세요.**
+
+## 🙏 감사의 말
+
+- **ComfyUI** 팀: 혁신적인 AI 워크플로우 도구
+- **Forge** 팀: 안정적인 Stable Diffusion WebUI
+- **Docker** 팀: 컨테이너 기술
+- **NVIDIA** 팀: GPU 가속 기술
+- **PyTorch** 팀: 딥러닝 프레임워크
 
 ---
 
-# RTX 3080 AI Docker Setup
-## 환경 변수 설정 가이드
-### .env 파일 템플릿
-프로젝트 루트 디렉토리에 `.env` 파일을 생성하고 다음 템플릿을 참조하여 설정하세요:
-```bash
-# ===== Docker & 컨테이너 설정 =====
-# 컨테이너명 (영문, 숫자, 하이픈만 사용)
-CONTAINER_NAME=rtx3080-ai-container
-# 포트 설정 (외부:내부)
-JUPYTER_PORT=8888
-TENSORBOARD_PORT=6006
-SSH_PORT=2222
-# ===== 사용자 권한 설정 =====
-# 현재 시스템의 UID/GID (보안 및 파일 권한을 위해 필수)
-UID=1024
-GID=1024
-USER_NAME=aiuser
-# ===== GPU 설정 =====
-# NVIDIA GPU 디바이스 설정
-GPU_DEVICE_ID=0
-CUDA_VERSION=11.8
-CUDNN_VERSION=8
-# ===== 데이터 경로 설정 =====
-# 호스트 시스템의 절대 경로로 설정
-DATA_PATH=/home/YOUR_USERNAME/ai_data
-MODELS_PATH=/home/YOUR_USERNAME/ai_models
-NOTEBOOKS_PATH=/home/YOUR_USERNAME/notebooks
-OUTPUT_PATH=/home/YOUR_USERNAME/ai_output
-# ===== API 키 & 토큰 설정 =====
-# 실제 사용시 각 서비스에서 발급받은 키로 교체
-HUGGINGFACE_TOKEN=hf_XXXXXXXXXXXXXXXXXXXXXXXXX
-OPENAI_API_KEY=sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-WANDB_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# ===== 네트워크 설정 =====
-# Docker 네트워크 이름
-NETWORK_NAME=ai-network
-# ===== 로깅 설정 =====
-# 로그 레벨 (DEBUG, INFO, WARNING, ERROR)
-LOG_LEVEL=INFO
-LOG_PATH=/home/YOUR_USERNAME/logs
-# ===== 메모리 & 성능 설정 =====
+**⭐ 이 프로젝트가 도움이 되었다면 Star를 눌러주세요!**
+
+**🚀 RTX 3080으로 AI의 미래를 만들어가세요!**
