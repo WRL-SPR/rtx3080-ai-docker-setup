@@ -613,6 +613,7 @@ create_comfyui_container() {
         "-e" "CREATE_MODEL_SUBDIRS=$CREATE_MODEL_SUBDIRS"
         "-e" "ENABLE_VRAM_MONITORING=$ENABLE_VRAM_MONITORING"
         "-e" "LOG_LEVEL=$LOG_LEVEL"
+        "-e" "SECURITY_LEVEL=weak"
     )
     
     if [[ "$ENABLE_CACHE_SHARE" == "true" ]]; then
