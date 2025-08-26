@@ -154,6 +154,34 @@ whoami   # 사용자명 확인
 mkdir -p /home/yourname/my-ai-project/shared/{common/{models,outputs},cache,comfyui,forge,sdw}
 ```
 
+**🔧 환경 변수 설정 예시:**
+```bash
+# .env 파일 생성 및 수정
+cat > .env << 'EOF'
+# ===[👤 사용자 권한 설정]===
+USER_NAME=your_actual_username          # 실제 호스트 사용자명
+WANTED_UID=1000                         # 실제 호스트 UID
+WANTED_GID=1000                         # 실제 호스트 GID
+
+# ===[📁 경로 설정]===
+BASE_DIR=/home/your_actual_username/ai-project/shared
+MODELS_DIR=${BASE_DIR}/common/models
+OUTPUTS_DIR=${BASE_DIR}/common/outputs
+
+# ===[🐳 Docker 설정]===
+COMFYUI_IMAGE=mmartial/comfyui-nvidia-docker:latest
+FORGE_IMAGE=nykk3/stable-diffusion-webui-forge:latest
+SDW_IMAGE=siutin/stable-diffusion-webui-docker:latest-cuda
+
+# ===[🚀 RTX 3080 최적화]===
+ENABLE_RTX3080_OPTIMIZATION=true
+PYTORCH_VERSION=2.3.1+cu121
+XFORMERS_VERSION=0.0.26.post1
+PYTORCH_CUDA_ALLOC_CONF="max_split_size_mb:512,garbage_collection_threshold:0.6,expandable_segments:True"
+SHM_SIZE=4g
+EOF
+```
+
 ### 🚀 **RTX 3080 최적화 설정**
 
 ```bash
